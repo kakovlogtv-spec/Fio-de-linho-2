@@ -1,0 +1,7 @@
+{
+  "name": "Copy of FIO DE LINHO - Ateliê de Alta Costura",
+  "description": "Plataforma digital de luxo para gestão de medidas, coleções e acompanhamento de pedidos em Salvador, Bahia.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
