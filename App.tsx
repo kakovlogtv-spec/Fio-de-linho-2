@@ -1,15 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Collection from './components/Collection';
-import MeasurementsForm from './components/MeasurementsForm';
-import OrderTracker from './components/OrderTracker';
-import AdminDashboard from './components/AdminDashboard';
-import Hero from './components/Hero';
-import WhatsAppButton from './components/WhatsAppButton';
-import StyleConcierge from './components/StyleConcierge';
-import { User, Order, OrderStatus } from './types';
-import { INITIAL_ORDERS, ADMIN_EMAIL, ATELIER_ADDRESS } from './constants';
+import Header from './components/Header.tsx';
+import Collection from './components/Collection.tsx';
+import MeasurementsForm from './components/MeasurementsForm.tsx';
+import OrderTracker from './components/OrderTracker.tsx';
+import AdminDashboard from './components/AdminDashboard.tsx';
+import Hero from './components/Hero.tsx';
+import WhatsAppButton from './components/WhatsAppButton.tsx';
+import StyleConcierge from './components/StyleConcierge.tsx';
+import { User, Order, OrderStatus } from './types.ts';
+import { INITIAL_ORDERS, ADMIN_EMAIL, ATELIER_ADDRESS } from './constants.tsx';
 
 type View = 'home' | 'collection' | 'measurements' | 'status' | 'admin' | 'login' | 'concierge';
 

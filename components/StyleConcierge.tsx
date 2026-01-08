@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { getStylingAdvice } from '../services/gemini';
-import { MeasurementData } from '../types';
+import { getStylingAdvice } from '../services/gemini.ts';
+import { MeasurementData } from '../types.ts';
 
 const StyleConcierge: React.FC = () => {
   const [loading, setLoading] = useState(false);

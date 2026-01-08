@@ -1,10 +1,24 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { MeasurementData } from "../types";
+import { MeasurementData } from "../types.ts";
+
+// Helper para obter a chave de API de forma segura no navegador
+const getApiKey = () => {
+  try {
+    return (typeof process !== 'undefined' && process.env && process.env.API_KEY) ? process.env.API_KEY : '';
+  } catch {
+    return '';
+  }
+};
 
 export async function getStylingAdvice(data: MeasurementData, occasion: string, preference: string) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return "Nossa consultoria de elite está momentaneamente offline. Por favor, entre em contato via WhatsApp para um atendimento humano imediato.";
+  }
+
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
     const prompt = `Você é o Mestre Alfaiate Chefe da Fio de Linho em Salvador. 
     Analise estas medidas (cm): Peito ${data.chest}, Cintura ${data.waist}, Quadril ${data.hips}.
     O cliente busca uma roupa para: ${occasion} e prefere um estilo ${preference}.
@@ -28,8 +42,11 @@ export async function getStylingAdvice(data: MeasurementData, occasion: string, 
 }
 
 export async function analyzeMeasurements(data: MeasurementData) {
+  const apiKey = getApiKey();
+  if (!apiKey) return "Medidas recebidas! Nossa equipe de alfaiataria fará a análise técnica final.";
+
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
     const prompt = `Você é um mestre alfaiate da Fio de Linho em Salvador. 
     Analise estas medidas (cm): Cintura: ${data.waist}, Peito: ${data.chest}, Quadril: ${data.hips}, 
     Altura: ${data.height}, Peso: ${data.weight}.
