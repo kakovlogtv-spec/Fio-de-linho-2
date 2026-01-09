@@ -8,15 +8,18 @@ import AdminDashboard from './components/AdminDashboard.tsx';
 import Hero from './components/Hero.tsx';
 import WhatsAppButton from './components/WhatsAppButton.tsx';
 import StyleConcierge from './components/StyleConcierge.tsx';
-import { User, Order, OrderStatus } from './types.ts';
-import { INITIAL_ORDERS, ADMIN_EMAIL, ATELIER_ADDRESS } from './constants.tsx';
+import BookingCalendar from './components/BookingCalendar.tsx';
+import { User, Order, OrderStatus, Appointment, AvailabilitySlot } from './types.ts';
+import { INITIAL_ORDERS, ADMIN_EMAIL, ATELIER_ADDRESS, INITIAL_AVAILABILITY, INITIAL_APPOINTMENTS } from './constants.tsx';
 
-type View = 'home' | 'collection' | 'measurements' | 'status' | 'admin' | 'login' | 'concierge';
+type View = 'home' | 'collection' | 'measurements' | 'status' | 'admin' | 'login' | 'concierge' | 'booking';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('home');
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  const [appointments, setAppointments] = useState<Appointment[]>(INITIAL_APPOINTMENTS);
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>(INITIAL_AVAILABILITY);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,6 +50,21 @@ const App: React.FC = () => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
   };
 
+  const addAppointment = (app: Appointment) => {
+    setAppointments(prev => [app, ...prev]);
+    // Remove the slot from availability if we want strictly 1 per slot
+    setAvailability(prev => prev.map(slot => {
+      if (slot.date === app.date) {
+        return { ...slot, times: slot.times.filter(t => t !== app.time) };
+      }
+      return slot;
+    }).filter(slot => slot.times.length > 0));
+  };
+
+  const handleUpdateAvailability = (newAvailability: AvailabilitySlot[]) => {
+    setAvailability(newAvailability);
+  };
+
   const renderContent = () => {
     if (currentView === 'login') {
       return (
@@ -70,13 +88,22 @@ const App: React.FC = () => {
     }
 
     switch (currentView) {
-      case 'home': return <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} />;
+      case 'home': return <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} onBooking={() => setCurrentView('booking')} />;
       case 'collection': return <Collection />;
       case 'measurements': return <MeasurementsForm onOrderCreated={addNewOrder} />;
       case 'concierge': return <StyleConcierge />;
       case 'status': return <OrderTracker orders={orders} />;
-      case 'admin': return user?.role === 'admin' ? <AdminDashboard orders={orders} onUpdateStatus={updateOrderStatus} /> : <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} />;
-      default: return <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} />;
+      case 'booking': return <BookingCalendar availability={availability} onBook={addAppointment} />;
+      case 'admin': return user?.role === 'admin' ? (
+        <AdminDashboard 
+          orders={orders} 
+          onUpdateStatus={updateOrderStatus} 
+          appointments={appointments} 
+          availability={availability} 
+          onUpdateAvailability={handleUpdateAvailability}
+        />
+      ) : <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} onBooking={() => setCurrentView('booking')} />;
+      default: return <Hero onExplore={() => setCurrentView('collection')} onStatus={() => setCurrentView('status')} onBooking={() => setCurrentView('booking')} />;
     }
   };
 
@@ -101,7 +128,7 @@ const App: React.FC = () => {
             <h4 className="text-white font-bold text-[10px] uppercase tracking-[0.3em]">Navegação Maison</h4>
             <ul className="space-y-4 text-xs font-medium uppercase tracking-widest">
               <li><button onClick={() => setCurrentView('collection')} className="hover:text-[#c5a059] transition">Coleções Atuais</button></li>
-              <li><button onClick={() => setCurrentView('concierge')} className="hover:text-[#c5a059] transition">Style Concierge</button></li>
+              <li><button onClick={() => setCurrentView('booking')} className="hover:text-[#c5a059] transition">Agendamento VIP</button></li>
               <li><button onClick={() => setCurrentView('measurements')} className="hover:text-[#c5a059] transition">Central de Medidas</button></li>
               <li><button onClick={() => setCurrentView('status')} className="hover:text-[#c5a059] transition">Acompanhamento</button></li>
             </ul>

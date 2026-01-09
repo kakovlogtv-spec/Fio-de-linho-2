@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { User } from '../types';
+import { User } from '../types.ts';
 
 interface HeaderProps {
   currentView: string;
@@ -21,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout })
 
   const navItems = [
     { label: 'Coleção', value: 'collection' },
+    { label: 'Agendar', value: 'booking' },
     { label: 'Concierge IA', value: 'concierge' },
     { label: 'Medidas', value: 'measurements' },
     { label: 'Pedidos', value: 'status' },
@@ -44,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout })
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center space-x-12">
+          <nav className="hidden lg:flex items-center space-x-10">
             {navItems.map((item) => (
               <button
                 key={item.value}
@@ -65,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, user, onLogout })
                 onClick={() => setView('admin')}
                 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#c5a059] border border-[#c5a059]/30 px-6 py-2.5 rounded-full hover:bg-[#c5a059] hover:text-white transition-all shadow-lg shadow-[#c5a059]/10"
               >
-                Painel Admin
+                Admin
               </button>
             )}
 

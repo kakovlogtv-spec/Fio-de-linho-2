@@ -1,18 +1,14 @@
 
 import React from 'react';
-import { WHATSAPP_NUMBER } from '../constants';
+import { WHATSAPP_NUMBER } from '../constants.tsx';
 
 interface HeroProps {
   onExplore: () => void;
   onStatus: () => void;
+  onBooking: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onExplore, onStatus }) => {
-  const handleBooking = () => {
-    const message = encodeURIComponent("Olá! Gostaria de agendar uma consulta presencial no Ateliê em Salvador para tirar minhas medidas e discutir um projeto exclusivo.");
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
-  };
-
+const Hero: React.FC<HeroProps> = ({ onExplore, onStatus, onBooking }) => {
   return (
     <div className="relative min-h-[85vh] flex items-center rounded-[3rem] overflow-hidden bg-stone-900 group shadow-2xl">
       {/* Background Image with Overlay */}
@@ -50,7 +46,7 @@ const Hero: React.FC<HeroProps> = ({ onExplore, onStatus }) => {
               Explorar Coleção
             </button>
             <button
-              onClick={handleBooking}
+              onClick={onBooking}
               className="px-12 py-6 border border-white/30 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.3em] rounded-full hover:bg-white/10 transition-all active:scale-95"
             >
               Agendar Experiência

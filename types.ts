@@ -17,6 +17,7 @@ export interface MeasurementData {
   shoulders?: number;
   height?: number;
   weight?: number;
+  clothingType?: string;
 }
 
 export enum OrderStatus {
@@ -34,6 +35,7 @@ export interface Order {
   clientName: string;
   clientEmail: string;
   items: string[];
+  clothingType?: string;
   status: OrderStatus;
   date: string;
 }
@@ -43,4 +45,18 @@ export interface User {
   email: string;
   photo?: string;
   role: 'admin' | 'client';
+}
+
+export interface Appointment {
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  date: string;
+  time: string;
+  status: 'confirmed' | 'cancelled';
+}
+
+export interface AvailabilitySlot {
+  date: string; // ISO date string
+  times: string[]; // e.g. ["09:00", "14:00"]
 }

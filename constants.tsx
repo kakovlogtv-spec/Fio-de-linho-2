@@ -1,8 +1,8 @@
 
-import { ClothingItem, Order, OrderStatus } from './types';
+import { ClothingItem, Order, OrderStatus, Appointment, AvailabilitySlot } from './types';
 
 export const WHATSAPP_NUMBER = '5571984060628'; 
-export const ADMIN_EMAIL = 'proprietario@fiodelinho.com.br';
+export const ADMIN_EMAIL = 'fiodelinholtda@gmail.com';
 export const ATELIER_ADDRESS = 'Salvador, Bahia';
 
 export const COLLECTION_ITEMS: ClothingItem[] = [
@@ -80,13 +80,37 @@ export const INITIAL_ORDERS: Order[] = [
     items: ['Vestido de Seda Imperial'],
     status: OrderStatus.IN_PRODUCTION,
     date: '15/05/2024'
-  },
+  }
+];
+
+const generateFixedAvailability = (): AvailabilitySlot[] => {
+  const slots: AvailabilitySlot[] = [];
+  const today = new Date();
+  const times = ['16:30', '16:50', '17:10', '17:30'];
+
+  for (let i = 1; i <= 21; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      slots.push({
+        date: date.toISOString().split('T')[0],
+        times: [...times]
+      });
+    }
+  }
+  return slots;
+};
+
+export const INITIAL_AVAILABILITY: AvailabilitySlot[] = generateFixedAvailability();
+
+export const INITIAL_APPOINTMENTS: Appointment[] = [
   {
-    id: 'FL-2024-002',
-    clientName: 'Ricardo Menezes',
-    clientEmail: 'cliente@exemplo.com',
-    items: ['Costume Italiano Super 150'],
-    status: OrderStatus.MEASURED,
-    date: '18/05/2024'
+    id: 'APP-1020',
+    clientName: 'Mariana Costa',
+    clientEmail: 'mariana@email.com',
+    date: INITIAL_AVAILABILITY[0]?.date || '2024-06-20',
+    time: '16:30',
+    status: 'confirmed'
   }
 ];

@@ -10,19 +10,36 @@ interface MeasurementsFormProps {
 }
 
 const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) => {
-  const [formData, setFormData] = useState<MeasurementData>({});
+  const [formData, setFormData] = useState<MeasurementData>({ clothingType: 'Terno Completo' });
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [projectCode, setProjectCode] = useState<string | null>(null);
   const [clientInfo, setClientInfo] = useState({ name: '', email: '' });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'clientName' || name === 'clientEmail') {
       setClientInfo(prev => ({ ...prev, [name === 'clientName' ? 'name' : 'email']: value }));
+    } else if (name === 'clothingType') {
+      setFormData(prev => ({ ...prev, [name]: value }));
     } else {
       setFormData(prev => ({ ...prev, [name]: parseFloat(value) || undefined }));
     }
+  };
+
+  const sendToWhatsApp = () => {
+    let message = `🧵 *NOVO PEDIDO DE CONFECÇÃO SOB MEDIDA*\n\n`;
+    message += `📌 *Protocolo:* ${projectCode}\n`;
+    message += `👤 *Cliente:* ${clientInfo.name}\n`;
+    message += `👗 *Peça:* ${formData.clothingType}\n\n`;
+    message += `📏 *Medidas (cm):*\n`;
+    message += `• Peito: ${formData.chest || '-'}\n`;
+    message += `• Cintura: ${formData.waist || '-'}\n`;
+    message += `• Quadril: ${formData.hips || '-'}\n`;
+    message += `• Ombros: ${formData.shoulders || '-'}\n\n`;
+    message += `_O cliente aguarda contato para validação do design._`;
+    
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,21 +57,18 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
         id: code,
         clientName: clientInfo.name || 'Cliente Interessado',
         clientEmail: clientInfo.email || 'contato@exemplo.com',
-        items: ['Projeto Sob Medida Personalizado'],
+        items: [formData.clothingType || 'Projeto Sob Medida'],
+        clothingType: formData.clothingType,
         status: OrderStatus.PENDING,
         date: new Date().toLocaleDateString('pt-BR')
       });
     }
-    setLoading(false);
-  };
-
-  const sendToWhatsApp = () => {
-    let message = `Olá! Sou o(a) portador(a) do TICKET DE PEDIDO ${projectCode}.\nAcabei de enviar minhas medidas e gostaria de iniciar a produção.\n\n`;
-    message += `Resumo:\n• Nome: ${clientInfo.name}\n`;
-    message += `• Código: ${projectCode}\n\n`;
-    message += `Fico no aguardo da sua confirmação de recebimento!`;
     
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    setLoading(false);
+    // Notificação automática ao finalizar
+    setTimeout(() => {
+        sendToWhatsApp();
+    }, 1500);
   };
 
   return (
@@ -64,19 +78,16 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
         {/* Lado Esquerdo - Instruções */}
         <div className="lg:w-[35%] bg-stone-950 p-12 text-white flex flex-col relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#c5a059]/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-          <h2 className="text-4xl font-serif mb-8 leading-tight relative z-10">Inicie seu <span className="italic text-[#c5a059]">Projeto</span></h2>
+          <h2 className="text-4xl font-serif mb-8 leading-tight relative z-10">Envio de <span className="italic text-[#c5a059]">Medidas</span></h2>
           <p className="text-stone-400 font-light leading-relaxed mb-12 relative z-10">
-            Ao enviar suas medidas, nosso sistema gerará um código de acompanhamento único para que você siga cada ponto da costura.
+            Nossos mestres alfaiates utilizam estas proporções para criar a estrutura inicial da sua peça. Precisão é o segredo da elegância.
           </p>
           
           <div className="space-y-6 mt-auto relative z-10">
             <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#c5a059] mb-2">Como funciona</h4>
-              <p className="text-xs text-stone-400 leading-relaxed">
-                1. Preencha seus dados e medidas.<br/>
-                2. Receba seu código de Ticket FDL.<br/>
-                3. Acompanhe o status em tempo real.<br/>
-                4. Receba sua peça exclusiva em casa.
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#c5a059] mb-2">Dica de Ouro</h4>
+              <p className="text-xs text-stone-400 leading-relaxed italic">
+                "Use uma fita métrica flexível e peça ajuda a alguém para garantir que a fita esteja nivelada ao redor do corpo."
               </p>
             </div>
           </div>
@@ -86,15 +97,27 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
         <div className="lg:w-[65%] p-12 flex flex-col">
           {!projectCode ? (
             <form onSubmit={handleSubmit} className="space-y-8 flex-grow animate-fade">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Seu Nome Completo</label>
                   <input type="text" name="clientName" required onChange={handleChange} className="w-full bg-stone-50 border-b border-stone-200 py-3 text-stone-900 focus:border-[#c5a059] outline-none font-serif text-lg" placeholder="Ex: João Silva" />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Peça Desejada</label>
+                  <select name="clothingType" value={formData.clothingType} onChange={handleChange} className="w-full bg-stone-50 border-b border-stone-200 py-3 text-stone-900 focus:border-[#c5a059] outline-none font-serif text-lg appearance-none">
+                    <option>Terno Completo (3 peças)</option>
+                    <option>Costume (2 peças)</option>
+                    <option>Vestido de Gala</option>
+                    <option>Camisa Social de Luxo</option>
+                    <option>Calça de Alfaiataria</option>
+                    <option>Blazer / Paletó</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-8">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400">E-mail para Contato</label>
                   <input type="email" name="clientEmail" required onChange={handleChange} className="w-full bg-stone-50 border-b border-stone-200 py-3 text-stone-900 focus:border-[#c5a059] outline-none font-serif text-lg" placeholder="seu@email.com" />
-                </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
@@ -114,9 +137,9 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
                 ))}
               </div>
 
-              <button type="submit" disabled={loading} className="w-full bg-stone-900 text-white font-bold py-6 rounded-2xl transition-all shadow-2xl hover:bg-stone-800 disabled:opacity-50 group">
+              <button type="submit" disabled={loading} className="w-full bg-stone-900 text-white font-bold py-6 rounded-2xl transition-all shadow-2xl hover:bg-[#c5a059] disabled:opacity-50 group">
                 <span className="text-xs uppercase tracking-[0.3em]">
-                  {loading ? 'Gerando Ticket Digital...' : 'Enviar Medidas e Criar Código'}
+                  {loading ? 'Processando Medidas...' : 'Enviar e Notificar Ateliê'}
                 </span>
               </button>
             </form>
@@ -124,12 +147,12 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
             <div className="flex flex-col items-center justify-center h-full text-center space-y-8 animate-in zoom-in-95 duration-700">
                <div className="w-24 h-24 bg-[#c5a059]/10 rounded-full flex items-center justify-center text-[#c5a059] mb-4">
                   <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                   </svg>
                </div>
                <div>
-                 <h3 className="text-4xl font-serif text-stone-900 mb-2">Pedido Recebido com Sucesso</h3>
-                 <p className="text-stone-500 font-light">Seu código de acompanhamento exclusivo é:</p>
+                 <h3 className="text-4xl font-serif text-stone-900 mb-2">Obra de Arte Iniciada</h3>
+                 <p className="text-stone-500 font-light">Seu pedido foi registrado. Notificamos o proprietário via WhatsApp.</p>
                  <div className="mt-6 p-6 bg-stone-50 rounded-3xl border-2 border-dashed border-[#c5a059]/30 inline-block">
                     <span className="text-4xl font-serif font-bold tracking-widest text-stone-900">{projectCode}</span>
                  </div>
@@ -141,13 +164,12 @@ const MeasurementsForm: React.FC<MeasurementsFormProps> = ({ onOrderCreated }) =
 
                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg">
                  <button onClick={sendToWhatsApp} className="flex-grow bg-[#25D366] text-white py-5 rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl hover:scale-[1.02] transition-all">
-                   Avisar Alfaiate via WhatsApp
+                   Reenviar Medidas via WhatsApp
                  </button>
                  <button onClick={() => window.location.reload()} className="px-8 py-5 border border-stone-200 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-stone-50 transition-all">
-                   Novo Pedido
+                   Voltar
                  </button>
                </div>
-               <p className="text-[10px] text-stone-400 uppercase tracking-widest">Guarde seu código para consultar o status na aba "PEDIDOS"</p>
             </div>
           )}
         </div>
