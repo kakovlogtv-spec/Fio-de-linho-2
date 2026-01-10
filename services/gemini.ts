@@ -2,13 +2,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { MeasurementData } from "../types.ts";
 
-// Helper para obter a chave de API de forma segura no navegador
+// Helper robusto para obter a API Key em diferentes ambientes de deploy
 const getApiKey = () => {
-  try {
-    return (typeof process !== 'undefined' && process.env && process.env.API_KEY) ? process.env.API_KEY : '';
-  } catch {
-    return '';
-  }
+  // Tenta obter do process.env (padrão) ou de import.meta.env (Vite/Modern)
+  const key = (typeof process !== 'undefined' && process.env?.API_KEY) || 
+              (import.meta as any).env?.VITE_API_KEY || 
+              (import.meta as any).env?.API_KEY || "";
+  return key;
 };
 
 export async function getStylingAdvice(data: MeasurementData, occasion: string, preference: string) {
