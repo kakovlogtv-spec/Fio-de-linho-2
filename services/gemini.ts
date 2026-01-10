@@ -2,12 +2,19 @@
 import { GoogleGenAI } from "@google/genai";
 import { MeasurementData } from "../types.ts";
 
-// Helper robusto para obter a API Key em diferentes ambientes de deploy
-const getApiKey = () => {
-  // Tenta obter do process.env (padrão) ou de import.meta.env (Vite/Modern)
+/**
+ * Helper robusto para extrair a API KEY de variáveis de ambiente.
+ * No Netlify (Vite), as variáveis de ambiente devem ser prefixadas com VITE_ 
+ * se forem acessadas via import.meta.env, ou definidas no painel e acessadas via process.env no build.
+ */
+const getApiKey = (): string => {
+  // 1. Tenta process.env (Node/Build time)
+  // 2. Tenta import.meta.env (Vite/Runtime)
+  // 3. Tenta a variável global injetada pelo ambiente de execução
   const key = (typeof process !== 'undefined' && process.env?.API_KEY) || 
               (import.meta as any).env?.VITE_API_KEY || 
-              (import.meta as any).env?.API_KEY || "";
+              (import.meta as any).env?.API_KEY || 
+              "";
   return key;
 };
 

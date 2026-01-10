@@ -21,15 +21,28 @@ const App: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>(INITIAL_APPOINTMENTS);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>(INITIAL_AVAILABILITY);
   const [loading, setLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
-      console.warn("Scroll failed", e);
+      console.warn("Scroll reset failed", e);
     }
   }, [currentView]);
+
+  // Fallback para evitar crash total se algo falhar no render
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-stone-50 p-10 text-center">
+        <div className="max-w-md">
+          <h1 className="text-3xl font-serif mb-4 text-stone-900">Maison em Manutenção</h1>
+          <p className="text-stone-500 mb-8 font-light leading-relaxed">Ocorreu um erro inesperado ao carregar a plataforma. Nossa equipe técnica já foi notificada.</p>
+          <button onClick={() => window.location.reload()} className="bg-stone-900 text-white px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest">Recarregar</button>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogin = (role: 'admin' | 'client') => {
     setLoading(true);
@@ -68,18 +81,6 @@ const App: React.FC = () => {
   const handleUpdateAvailability = (newAvailability: AvailabilitySlot[]) => {
     setAvailability(newAvailability);
   };
-
-  if (hasError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-stone-50 p-10 text-center">
-        <div>
-          <h1 className="text-3xl font-serif mb-4">Algo não saiu como esperado</h1>
-          <p className="text-stone-500 mb-8">Nossa equipe técnica já foi notificada.</p>
-          <button onClick={() => window.location.reload()} className="bg-stone-900 text-white px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest">Recarregar Maison</button>
-        </div>
-      </div>
-    );
-  }
 
   const renderContent = () => {
     if (currentView === 'login') {
@@ -125,7 +126,13 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[#fafaf8]">
       <Header currentView={currentView} setView={setCurrentView} user={user} onLogout={() => {setUser(null); setCurrentView('home');}} />
       <main className="flex-grow pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-4">{renderContent()}</div>
+        <div className="max-w-7xl mx-auto px-4">
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="w-12 h-12 border-4 border-[#c5a059]/20 border-t-[#c5a059] rounded-full animate-spin"></div>
+            </div>
+          ) : renderContent()}
+        </div>
       </main>
       <footer className="bg-stone-950 text-stone-500 py-24 px-4 relative overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 relative z-10">
